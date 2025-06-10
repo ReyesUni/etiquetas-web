@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Etiquetas</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-900">
+  <div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">📦 Gestión de Etiquetas</h1>
+    <table class="w-full table-auto border-collapse border border-gray-300">
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="border px-4 py-2">Artículo</th>
+          <th class="border px-4 py-2">Descripción</th>
+          <th class="border px-4 py-2">Lote</th>
+          <th class="border px-4 py-2">Cantidad</th>
+          <th class="border px-4 py-2">Notas</th>
+          <th class="border px-4 py-2">Estado</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-etiquetas" class="text-center">
+        <!-- Aquí se añadirán las etiquetas -->
+      </tbody>
+    </table>
+    <div class="mt-6">
+      <button onclick="marcarComoImpresa(0)" class="bg-green-600 text-white px-4 py-2 rounded">✅ Marcar primera como impresa</button>
+    </div>
+  </div>
+
+  <script>
+    const etiquetas = [
+      { articulo: "001", descripcion: "Producto A", lote: "L123", cantidad: 100, notas: "Cambiar idioma", estado: "Pendiente" },
+      { articulo: "002", descripcion: "Producto B", lote: "L456", cantidad: 250, notas: "Incluir logo", estado: "Pendiente" }
+    ];
+
+    function renderTabla() {
+      const tabla = document.getElementById("tabla-etiquetas");
+      tabla.innerHTML = etiquetas.map((e, i) => `
+        <tr>
+          <td class="border px-4 py-2">${e.articulo}</td>
+          <td class="border px-4 py-2">${e.descripcion}</td>
+          <td class="border px-4 py-2">${e.lote}</td>
+          <td class="border px-4 py-2">${e.cantidad}</td>
+          <td class="border px-4 py-2">${e.notas}</td>
+          <td class="border px-4 py-2">${e.estado}</td>
+        </tr>
+      `).join('');
+    }
+
+    function marcarComoImpresa(index) {
+      etiquetas[index].estado = "Impresa";
+      renderTabla();
+    }
+
+    renderTabla();
+  </script>
+</body>
+</html>
