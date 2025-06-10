@@ -3,56 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <title>Gestión de Etiquetas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 text-gray-900">
-  <div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded shadow">
-    <h1 class="text-2xl font-bold mb-4">📦 Gestión de Etiquetas</h1>
-    <table class="w-full table-auto border-collapse border border-gray-300">
-      <thead class="bg-gray-200">
-        <tr>
-          <th class="border px-4 py-2">Artículo</th>
-          <th class="border px-4 py-2">Descripción</th>
-          <th class="border px-4 py-2">Lote</th>
-          <th class="border px-4 py-2">Cantidad</th>
-          <th class="border px-4 py-2">Notas</th>
-          <th class="border px-4 py-2">Estado</th>
-        </tr>
-      </thead>
-      <tbody id="tabla-etiquetas" class="text-center">
-        <!-- Aquí se añadirán las etiquetas -->
-      </tbody>
-    </table>
-    <div class="mt-6">
-      <button onclick="marcarComoImpresa(0)" class="bg-green-600 text-white px-4 py-2 rounded">✅ Marcar primera como impresa</button>
+
+<body class="bg-gray-100 text-gray-900 min-h-screen flex items-start justify-center p-6">
+  <!-- CONTENEDOR PRINCIPAL -->
+  <div class="w-full max-w-4xl bg-white rounded shadow p-6">
+    <h1 class="text-2xl font-bold mb-6 flex items-center gap-2">
+      <span>📦</span> Gestión de Etiquetas
+    </h1>
+
+    <!-- TABLA -->
+    <div class="overflow-x-auto">
+      <table class="w-full table-auto border-collapse border border-gray-300 text-sm md:text-base">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="border px-3 py-2">Artículo</th>
+            <th class="border px-3 py-2">Descripción</th>
+            <th class="border px-3 py-2">Lote</th>
+            <th class="border px-3 py-2">Cantidad</th>
+            <th class="border px-3 py-2">Notas</th>
+            <th class="border px-3 py-2">Estado</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-etiquetas" class="text-center"></tbody>
+      </table>
     </div>
+
+    <!-- FORMULARIO AÑADIR -->
+    <h2 class="text-xl font-semibold mt-8 mb-4">➕ Añadir nueva etiqueta</h2>
+    <form id="form-etiqueta" class="grid sm:grid-cols-2 gap-4">
+      <input required name="articulo" placeholder="Artículo" class="border p-2 rounded" />
+      <input required name="descripcion" placeholder="Descripción" class="border p-2 rounded" />
+      <input required name="lote" placeholder="Lote"           class="border p-2 rounded" />
+      <input required name="cantidad" type="number" min="1" placeholder="Cantidad" class="border p-2 rounded" />
+      <input name="notas" placeholder="Notas" class="border p-2 rounded sm:col-span-2" />
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded sm:col-span-2">
+        Guardar
+      </button>
+    </form>
   </div>
 
+  <!-- SCRIPT -->
   <script>
-    const etiquetas = [
-      { articulo: "001", descripcion: "Producto A", lote: "L123", cantidad: 100, notas: "Cambiar idioma", estado: "Pendiente" },
-      { articulo: "002", descripcion: "Producto B", lote: "L456", cantidad: 250, notas: "Incluir logo", estado: "Pendiente" }
-    ];
+    /* ---------- UTILIDADES LOCAL STORAGE ---------- */
+    const LS_KEY = 'etiquetasMarketing';
+    function loadEtiquetas() {
+      const guardado = localStorage.getItem(LS_KEY);
+      return guardado ? JSON.parse(guardado) : [
+        { articulo: '001', descripcion: 'Producto A', lote: 'L123', cantidad: 100, notas: 'Cambiar idioma', estado: 'Pendiente' },
+        { articulo: '002', descripcion: 'Producto B', lote: 'L456', cantidad: 250, notas: 'Incluir logo',  estado: 'Pendiente' }
+      ];
+    }
+    function saveEtiquetas(data) {
+      localStorage.setItem(LS_KEY, JSON.stringify(data));
+    }
 
+    /* ---------- ESTADO EN MEMORIA ---------- */
+    let etiquetas = loadEtiquetas();
+
+    /* ---------- RENDER TABLA ---------- */
     function renderTabla() {
-      const tabla = document.getElementById("tabla-etiquetas");
-      tabla.innerHTML = etiquetas.map((e, i) => `
-        <tr>
-          <td class="border px-4 py-2">${e.articulo}</td>
-          <td class="border px-4 py-2">${e.descripcion}</td>
-          <td class="border px-4 py-2">${e.lote}</td>
-          <td class="border px-4 py-2">${e.cantidad}</td>
-          <td class="border px-4 py-2">${e.notas}</td>
-          <td class="border px-4 py-2">${e.estado}</td>
+      const tbody = document.getElementById('tabla-etiquetas');
+      if (!etiquetas.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="py-4">No hay etiquetas</td></tr>';
+        return;
+      }
+      tbody.innerHTML = etiquetas.map((e, i) => `
+        <tr class="hover:bg-gray-100 cursor-pointer" onclick="toggleEstado(${i})">
+          <td class="border px-3 py-2">${e.articulo}</td>
+          <td class="border px-3 py-2">${e.descripcion}</td>
+          <td class="border px-3 py-2">${e.lote}</td>
+          <td class="border px-3 py-2">${e.cantidad}</td>
+          <td class="border px-3 py-2">${e.notas || ''}</td>
+          <td class="border px-3 py-2 ${e.estado === 'Impresa' ? 'text-green-600 font-semibold' : ''}">
+            ${e.estado}
+          </td>
         </tr>
       `).join('');
     }
 
-    function marcarComoImpresa(index) {
-      etiquetas[index].estado = "Impresa";
+    /* ---------- TOGGLE ESTADO ---------- */
+    function toggleEstado(index) {
+      etiquetas[index].estado = etiquetas[index].estado === 'Impresa' ? 'Pendiente' : 'Impresa';
+      saveEtiquetas(etiquetas);
       renderTabla();
     }
 
+    /* ---------- FORMULARIO NUEVA ETIQUETA ---------- */
+    document.getElementById('form-etiqueta').addEventListener('submit', evt => {
+      evt.preventDefault();
+      const data = Object.fromEntries(new FormData(evt.target).entries());
+      etiquetas.push({ ...data, estado: 'Pendiente' });
+      saveEtiquetas(etiquetas);
+      evt.target.reset();
+      renderTabla();
+    });
+
+    /* ---------- INICIAL ---------- */
     renderTabla();
   </script>
 </body>
